@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { ShoppingItem } from "@/hooks/useShoppingList";
+import { commonGroceryItems } from "@/utils/commonItems";
+import * as LucideIcons from "lucide-react";
 
 interface ShoppingItemProps {
   item: ShoppingItem;
@@ -36,14 +38,26 @@ export default function ShoppingItemComponent({
     }
   };
 
+  // Find matching icon for the item
+  const findIcon = () => {
+    const match = commonGroceryItems.find(
+      (groceryItem) => groceryItem.name.toLowerCase() === item.name.toLowerCase()
+    );
+    return match?.icon || null;
+  };
+
+  const IconComponent = findIcon() ? LucideIcons[findIcon() as keyof typeof LucideIcons] : null;
+
   return (
-    <div className="flex items-center p-3 group border border-gray-200 rounded-lg mb-2 bg-white hover:shadow-sm transition-shadow">
+    <div className="flex items-center p-3 group border border-gray-200 dark:border-gray-700 rounded-lg mb-2 bg-white dark:bg-gray-800 hover:shadow-sm transition-shadow">
       <Button
         variant="ghost"
         size="icon"
         className={cn(
           "h-6 w-6 rounded-full mr-3 flex-shrink-0",
-          item.completed ? "bg-green-100 text-green-500" : "bg-gray-100"
+          item.completed 
+            ? "bg-green-100 text-green-500 dark:bg-green-900 dark:text-green-400" 
+            : "bg-gray-100 dark:bg-gray-700"
         )}
         onClick={() => onToggle(item.id)}
       >
@@ -64,13 +78,14 @@ export default function ShoppingItemComponent({
       ) : (
         <div
           className={cn(
-            "flex-1",
-            item.completed && "line-through text-gray-400"
+            "flex-1 flex items-center gap-2 text-foreground",
+            item.completed && "line-through text-gray-400 dark:text-gray-500"
           )}
         >
-          {item.name}
+          {IconComponent && <IconComponent className="h-4 w-4 text-gray-500 dark:text-gray-400" />}
+          <span>{item.name}</span>
           {item.category && (
-            <span className="ml-2 text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-500">
+            <span className="ml-2 text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-500 dark:text-gray-400">
               {item.category}
             </span>
           )}
@@ -94,7 +109,7 @@ export default function ShoppingItemComponent({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+          className="h-8 w-8 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30"
           onClick={() => onDelete(item.id)}
         >
           <Trash className="h-4 w-4" />
