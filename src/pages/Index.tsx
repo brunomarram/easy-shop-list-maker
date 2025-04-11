@@ -4,6 +4,7 @@ import { SidebarProvider, Sidebar, SidebarContent, SidebarTrigger, SidebarMenu, 
 import { ShoppingCart, List, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import SavedLists from "@/components/SavedLists";
 import ShoppingList from "@/components/ShoppingList";
 
@@ -13,20 +14,23 @@ const Index = () => {
   
   return (
     <SidebarProvider>
-      <div className="h-screen flex w-full bg-gray-50">
+      <div className="h-screen flex w-full bg-background">
         {/* Sidebar */}
-        <Sidebar side="left" className="border-r border-gray-200">
+        <Sidebar side="left" className="border-r border-border">
           <SidebarContent className="pt-4">
             {/* Logo and Search */}
             <div className="px-4 mb-4">
-              <div className="flex items-center gap-2 mb-4">
-                <ShoppingCart className="h-6 w-6 text-green-500" />
-                <h1 className="text-xl font-bold">EasyShop</h1>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="h-6 w-6 text-green-500" />
+                  <h1 className="text-xl font-bold">MercaList</h1>
+                </div>
+                <ThemeToggle />
               </div>
               <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search items..."
+                  placeholder="Buscar items..."
                   className="pl-8"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -50,7 +54,7 @@ const Index = () => {
             <div className="flex items-center gap-2 mb-4">
               <SidebarTrigger className="md:hidden" />
               <h2 className="text-2xl font-bold">
-                {activeList ? activeList : "Shopping List"}
+                {activeList ? activeList : "Lista de Compras"}
               </h2>
             </div>
             <ShoppingList 
