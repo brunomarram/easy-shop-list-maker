@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Plus, Save, Trash2, Edit, Check, X } from "lucide-react";
+import { Plus, Save, Trash2, Edit, Check, X, ShoppingCart, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
