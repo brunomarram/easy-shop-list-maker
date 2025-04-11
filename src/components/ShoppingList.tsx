@@ -1,22 +1,39 @@
 
-import { useState } from "react";
-import { ShoppingCart, CheckCheck, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ShoppingCart, CheckCheck, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import AddItemForm from "./AddItemForm";
 import ShoppingItemComponent from "./ShoppingItem";
 import { useShoppingList } from "@/hooks/useShoppingList";
 
-export default function ShoppingList() {
-  const { items, addItem, toggleItem, editItem, deleteItem, clearCompleted } = useShoppingList();
+interface ShoppingListProps {
+  listId: string;
+  searchTerm?: string;
+}
+
+export default function ShoppingList({ listId, searchTerm = "" }: ShoppingListProps) {
+  const { items, addItem, toggleItem, editItem, deleteItem, clearCompleted, clearList } = useShoppingList(listId);
   const { toast } = useToast();
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
 
-  const filteredItems = items.filter((item) => {
-    if (filter === "active") return !item.completed;
-    if (filter === "completed") return item.completed;
-    return true;
-  });
+  // Reset filter when changing lists
+  useEffect(() => {
+    setFilter("all");
+  }, [listId]);
+
+  const filteredItems = items
+    .filter((item) => {
+      // Apply search filter first
+      if (searchTerm && !item.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+      
+      // Then apply status filter
+      if (filter === "active") return !item.completed;
+      if (filter === "completed") return item.completed;
+      return true;
+    });
 
   const handleClearCompleted = () => {
     const completedCount = items.filter(item => item.completed).length;
@@ -26,6 +43,17 @@ export default function ShoppingList() {
     toast({
       description: `Removed ${completedCount} completed ${completedCount === 1 ? 'item' : 'items'}.`,
     });
+  };
+
+  const handleClearList = () => {
+    if (items.length === 0) return;
+
+    if (confirm(`Are you sure you want to clear the entire "${listId}" list?`)) {
+      clearList();
+      toast({
+        description: `List "${listId}" has been cleared.`,
+      });
+    }
   };
 
   const handleDelete = (id: string) => {
@@ -38,11 +66,6 @@ export default function ShoppingList() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="flex items-center mb-6">
-        <ShoppingCart className="mr-2 h-6 w-6 text-green-500" />
-        <h1 className="text-2xl font-bold text-gray-800">Shopping List</h1>
-      </div>
-
       <AddItemForm onAdd={addItem} />
 
       {items.length > 0 && (
@@ -74,15 +97,27 @@ export default function ShoppingList() {
             </Button>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleClearCompleted}
-            className="text-gray-500"
-          >
-            <Trash2 className="mr-1 h-4 w-4" />
-            Clear done
-          </Button>
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearCompleted}
+              className="text-gray-500"
+            >
+              <CheckCheck className="mr-1 h-4 w-4" />
+              <span className="hidden sm:inline">Clear done</span>
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearList}
+              className="text-red-500 hover:text-red-600 hover:border-red-300"
+            >
+              <X className="mr-1 h-4 w-4" />
+              <span className="hidden sm:inline">Clear all</span>
+            </Button>
+          </div>
         </div>
       )}
 
@@ -91,9 +126,11 @@ export default function ShoppingList() {
           <div className="text-center py-8 text-gray-500">
             {items.length === 0 
               ? "Your shopping list is empty. Add some items!" 
-              : filter === "completed" 
-                ? "No completed items yet." 
-                : "No active items. Everything's done!"}
+              : searchTerm
+                ? "No items match your search."
+                : filter === "completed" 
+                  ? "No completed items yet." 
+                  : "No active items. Everything's done!"}
           </div>
         ) : (
           filteredItems.map((item) => (

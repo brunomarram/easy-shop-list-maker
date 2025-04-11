@@ -6,13 +6,17 @@ export interface ShoppingItem {
   name: string;
   completed: boolean;
   category?: string;
+  listId: string;
 }
 
-export function useShoppingList() {
+export function useShoppingList(listId: string = "default") {
   const [items, setItems] = useState<ShoppingItem[]>(() => {
     const savedItems = localStorage.getItem("shoppingList");
     return savedItems ? JSON.parse(savedItems) : [];
   });
+
+  // Get items for the current list
+  const listItems = items.filter(item => item.listId === listId);
 
   useEffect(() => {
     localStorage.setItem("shoppingList", JSON.stringify(items));
@@ -26,6 +30,7 @@ export function useShoppingList() {
       name: name.trim(),
       completed: false,
       category,
+      listId,
     };
     
     setItems((currentItems) => [...currentItems, newItem]);
@@ -54,15 +59,37 @@ export function useShoppingList() {
   };
 
   const clearCompleted = () => {
-    setItems((currentItems) => currentItems.filter((item) => !item.completed));
+    setItems((currentItems) => 
+      currentItems.filter((item) => !(item.listId === listId && item.completed))
+    );
+  };
+
+  const copyList = (sourceListId: string, targetListId: string) => {
+    const sourceItems = items.filter(item => item.listId === sourceListId);
+    
+    const newItems = sourceItems.map(item => ({
+      ...item,
+      id: Date.now() + Math.random().toString(),
+      listId: targetListId
+    }));
+    
+    setItems([...items, ...newItems]);
+  };
+
+  const clearList = () => {
+    setItems((currentItems) => 
+      currentItems.filter((item) => item.listId !== listId)
+    );
   };
 
   return {
-    items,
+    items: listItems,
     addItem,
     toggleItem,
     editItem,
     deleteItem,
     clearCompleted,
+    copyList,
+    clearList,
   };
 }
